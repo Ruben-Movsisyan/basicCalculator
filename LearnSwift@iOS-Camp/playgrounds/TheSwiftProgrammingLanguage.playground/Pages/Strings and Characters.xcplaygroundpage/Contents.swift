@@ -244,7 +244,7 @@
     greet.insert(contentsOf: " there", at: greet.index(before:  greet.endIndex))
 //: Remove a single character from a string at a specified index with the `remove(at:)` method, and remove a substring at a specified range with the `removeSubrange(_:)` method:
     welcome.remove(at: welcome.index(before: welcome.endIndex))
-
+    print(welcome)
     let range = welcome.index(welcome.endIndex, offsetBy: -6)..<welcome.endIndex
 
     welcome.removeSubrange(range)

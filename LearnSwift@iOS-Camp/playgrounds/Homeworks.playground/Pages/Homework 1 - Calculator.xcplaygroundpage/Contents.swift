@@ -20,12 +20,14 @@ enum ArithmeticOperation {
 }
 
 public class Controller: NSObject, CalculatorViewDelegate, CalculatorViewDataSource {
-    var displayText = "0"
+    let zero = CalculatorKey.number(0).rawValue;
+    lazy var displayText = self.zero
     var pressedDot = false
     var equalPressed = false
     var lastUsedNum  = 0.0
     var trackValue = 0.0
     var operation: ArithmeticOperation?
+    
     public func prefixRemover(str: inout String, num: Int) -> Void?{
         if num < str.count{
             str = String(str.suffix(str.count - num))
@@ -33,7 +35,7 @@ public class Controller: NSObject, CalculatorViewDelegate, CalculatorViewDataSou
         return nil
     }
     public func clear() {
-        displayText = "0"
+        displayText = zero
         trackValue = 0.0
         operation = nil
         pressedDot = false
@@ -42,7 +44,8 @@ public class Controller: NSObject, CalculatorViewDelegate, CalculatorViewDataSou
     
     public func calculator(firstNum: Double, secondNum: Double) -> Double {
         guard let operation = operation else {
-            preconditionFailure() // do some error handling here
+            preconditionFailure("Error: Attempt for undefined operation")
+            
         }
         
         switch operation {
@@ -68,19 +71,19 @@ public class Controller: NSObject, CalculatorViewDelegate, CalculatorViewDataSou
             
         case .toggleSign:
             if isNumber(num: displayText){
-                if displayText.prefix(1) == "-"{
+                if displayText.prefix(1) == CalculatorKey.subtract.rawValue {
                     if prefixRemover(str: &displayText, num: 1) != nil {}
                 }
                 else {
-                    displayText = "-" + displayText
+                    displayText = CalculatorKey.subtract.rawValue + displayText
                 }
             }
             
         case .number:
-            if displayText == "0"{
+            if displayText == zero {
                 displayText = key.rawValue
-            } else if displayText == "-0" {
-                displayText = "-" + key.rawValue
+            } else if displayText == CalculatorKey.subtract.rawValue + zero {
+                displayText = CalculatorKey.subtract.rawValue + key.rawValue
             } else if equalPressed {
                 clear()
                 displayText = key.rawValue
@@ -93,12 +96,12 @@ public class Controller: NSObject, CalculatorViewDelegate, CalculatorViewDataSou
             if displayText == "" || equalPressed{
                 clear()
                 pressedDot = true
-                displayText = "0" + key.rawValue
-            } else if (!pressedDot) && isNumber(num: displayText){
+                displayText = zero + key.rawValue
+            } else if (!pressedDot) && isNumber(num : displayText){
                 pressedDot = true
                 displayText += key.rawValue
             } else if !pressedDot {
-                displayText = "0" + key.rawValue
+                displayText = zero + key.rawValue
                 pressedDot = true
             }
 
@@ -109,6 +112,11 @@ public class Controller: NSObject, CalculatorViewDelegate, CalculatorViewDataSou
                 }
                 else { trackValue = Double(displayText)! / 100}
                 displayText = String(trackValue)
+            }
+            if displayText.suffix(2) == CalculatorKey.dot.rawValue + zero {
+                displayText = String(displayText.prefix(displayText.count - 2))
+                
+                //displayText.removeSubrange(displayText.index(displayText.endIndex, offsetBy: -2)..<displayText.endIndex)
             }
             operation = nil
             equalPressed = true
@@ -122,6 +130,12 @@ public class Controller: NSObject, CalculatorViewDelegate, CalculatorViewDataSou
                 }
                 trackValue = calculator(firstNum: trackValue, secondNum: lastUsedNum)
                 displayText = String(trackValue)
+                if displayText.suffix(2) == CalculatorKey.dot.rawValue + zero {
+                    displayText = String(displayText.prefix(displayText.count - 2))
+                    
+                    //displayText.removeSubrange(displayText.index(displayText.endIndex, offsetBy: -2)..<displayText.endIndex)
+                }
+                
             }
             
         case .add, .subtract, .multiply, .divide:
